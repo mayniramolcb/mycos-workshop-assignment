@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workshop02 - Hi-Lo game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        font-family: "Inconsolata", serif;
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+        font-variation-settings: "wdth" 100;
+        font-size: 16px;
+      }
+      @keyframes bgFade {
+        from {
+          background-color: #fff2af;
+        }
+        to {
+          background-color: initial;
+        }
+      }
+      body {
+        margin: auto;
+        /* max-width: 1240px; */
+        background-color: #dad2ff;
+      }
+      .dice {
+        width: 100px;
+        height: 100px;
+        border-radius: 5px;
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px,
+          rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+        padding: 10px;
+        background-color: white;
+      }
+
+      .dice.dice-empty {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 36px;
+      }
+      .dice > div {
+        width: 20px;
+        height: 20px;
+        background-color: black;
+        border-radius: 100%;
+      }
+      .dice-1 {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .dice > div {
+        display: block;
+      }
+      .dice-2,
+      .dice-3 {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+      }
+      .dice-2 > div:nth-child(1) {
+        margin-left: calc((100% - 20px) * 2 / 3);
+      }
+      .dice-2 > div:nth-child(2) {
+        margin-left: calc((100% - 20px) * 1 / 3);
+      }
+
+      .dice-3 > div:nth-child(1) {
+        margin-left: calc(100% - 20px);
+      }
+      .dice-3 > div:nth-child(2) {
+        margin-left: calc((100% - 20px) / 2);
+      }
+      .dice-3 > div:nth-child(3) {
+        margin-left: 0%;
+      }
+
+      .dice-4,
+      .dice-5,
+      .dice-6 {
+        position: relative;
+      }
+
+      .dice-4 > div,
+      .dice-5 > div,
+      .dice-6 > div {
+        position: absolute;
+      }
+
+      .dice-4 > div:nth-of-type(1),
+      .dice-5 > div:nth-of-type(1),
+      .dice-6 > div:nth-of-type(1) {
+        top: 10px;
+        left: 10px;
+      }
+      .dice-4 > div:nth-of-type(2),
+      .dice-5 > div:nth-of-type(2),
+      .dice-6 > div:nth-of-type(2) {
+        top: 10px;
+        right: 10px;
+      }
+      .dice-4 > div:nth-of-type(3),
+      .dice-5 > div:nth-of-type(3),
+      .dice-6 > div:nth-of-type(3) {
+        bottom: 10px;
+        left: 10px;
+      }
+
+      .dice-4 > div:nth-of-type(4),
+      .dice-5 > div:nth-of-type(4),
+      .dice-6 > div:nth-of-type(4) {
+        bottom: 10px;
+        right: 10px;
+      }
+
+      .dice-5 > div:nth-of-type(5) {
+        top: calc((100% - 20px) / 2);
+        left: calc((100% - 20px) / 2);
+      }
+
+      .dice-6 > div:nth-of-type(5) {
+        top: calc((100% - 20px) / 2);
+        left: 10px;
+      }
+
+      .dice-6 > div:nth-of-type(6) {
+        top: calc((100% - 20px) / 2);
+        right: 10px;
+      }
+
+      .play-area-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .play-area-plus,
+      .play-area-equal {
+        font-size: 36px;
+      }
+      .play-area-box #play-area-result {
+        font-size: 36px;
+      }
+      input[type="text"],
+      input[type="number"],
+      select {
+        border-radius: 30px;
+        height: 50px;
+        padding: 0px 20px;
+        outline: none;
+        border: 2px solid #ddd;
+        box-sizing: border-box;
+        background-color: white;
+      }
+      button {
+        height: 50px;
+        padding: 0px 20px;
+        background-color: #493d9e;
+        color: white;
+        border-radius: 30px;
+        outline: none;
+        border: 2px solid #ddd;
+        box-sizing: border-box;
+        cursor: pointer;
+      }
+      button:hover {
+        opacity: 0.75;
+      }
+      .player-table {
+        overflow: hidden;
+        border-radius: 20px;
+        /* border: 2px solid #493d9e; */
+        /* background-color: #b2a5ff; */
+      }
+      .player-table .player-table-header {
+        color: white;
+        /* background-color: #493d9e; */
+      }
+      .player-table .player-table-header .column,
+      .player-table .player-table-body .column {
+        padding: 10px 20px;
+      }
+      .player-table .player-table-header,
+      .player-table .player-table-body {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .player-table .player-table-body .row:not(:last-of-type) .column {
+        border-bottom: 1px solid #fff2af;
+      }
+      .player-table .player-table-header .column {
+        font-weight: 900;
+      }
+      .player-table .player-table-header .column,
+      .player-table .player-table-body .column {
+        width: calc(100% / 5);
+      }
+
+      .player-table .player-table-body .row.win {
+        animation-name: bgFade;
+        animation-duration: 4s;
+      }
+      .player-table .player-table-header .row,
+      .player-table .player-table-body .row {
+        display: flex;
+        padding-left: 20%;
+        padding-right: 20%;
+      }
+
+      .player-table .player-table-header .row {
+        gap: 10px;
+      }
+
+      .player-table .player-table-header .row .column {
+        text-align: center;
+        font-weight: 900;
+        background: #fff2af;
+        border-radius: 20px;
+        color: #493d9e;
+      }
+      .player-table .player-table-body .row .column {
+        text-align: center;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+      }
+
+      .button-green {
+        background-color: green;
+        border-color: green;
+      }
+      .button-red {
+        background-color: red;
+        border-color: red;
+      }
+      .button-black {
+        background-color: black;
+        border-color: white;
+        color: white;
+      }
+      .button-gray {
+        background-color: #4C585B;
+        /* border-color: black; */
+        color: white;
+      }
+
+      .group-button {
+        display: inline-flex;
+        background-color: white;
+        height: 50px;
+        overflow: hidden;
+        border-radius: 30px;
+      }
+      .sub-button {
+        padding: 10px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: anchor-center;
+      }
+      .sub-button:hover {
+        opacity: 0.75;
+      }
+
+      .sub-button.high.active {
+        background-color: red;
+        color: white;
+      }
+
+      .sub-button.mid.active {
+        background-color: blue;
+        color: white;
+      }
+
+      .sub-button.low.active {
+        background-color: green;
+        color: white;
+      }
+      .play-area-sub-box {
+        border-radius: 30px;
+        padding: 20px;
+        color: white;
+        text-align: center;
+        font-size: 36px;
+      }
+      .play-area-sub-box.high {
+        background-color: red;
+      }
+
+      .play-area-sub-box.mid {
+        background-color: blue;
+      }
+
+      .play-area-sub-box.low {
+        background-color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div
+        style="
+          position: fixed;
+          width: 100%;
+          top: 0;
+          background-color: #dad2ff;
+          padding-bottom: 20px;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 20px;
+            padding-right: 20px;
+          "
+        >
+          <div>
+            <button type="button" class="button-gray" onclick="reset()">
+              Reset
+            </button>
+            <button
+              type="button"
+              class="button-black"
+              style="border: 2px solid white;font-weight: 900;"
+              onclick="start()"
+            >
+              Roll Dice
+            </button>
+          </div>
+          <h1
+            style="
+              text-align: center;
+              color: #fff2af;
+              font-size: 36px;
+              font-weight: 900;
+            "
+          >
+            Hi-lo game
+          </h1>
+          <div>
+            <button type="button" onclick="addPlayer()">Add player</button>
+          </div>
+        </div>
+
+        <div class="play-area-container" id="play-area">
+          <div id="play-area-dice-result1">
+            <div class="dice dice-empty">?</div>
+          </div>
+          <div class="play-area-plus">+</div>
+          <div id="play-area-dice-result2">
+            <div class="dice dice-empty">?</div>
+          </div>
+          <div class="play-area-plus">+</div>
+          <div id="play-area-dice-result3">
+            <div class="dice dice-empty">?</div>
+          </div>
+          <div class="play-area-equal">=</div>
+          <div class="play-area-box">
+            <div id="play-area-result">?</div>
+          </div>
+        </div>
+        <div class="player-table" style="margin-top: 40px">
+          <div class="player-table-header">
+            <div class="row">
+              <div class="column">Id</div>
+              <div class="column">Name</div>
+              <div class="column">Bet</div>
+              <div class="column">Result</div>
+              <div class="column">Point</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 300px">
+        <div class="player-table">
+          <div class="player-table-body" id="player-table"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function generateId() {
+        return (Math.random() + 1).toString(36).substring(7);
+      }
+
+      const possibleResults = [
+        { id: 0, value: "High" },
+        { id: 1, value: "Mid" },
+        { id: 2, value: "Low" },
+      ];
+      const defaultPlayer = {
+        name: null,
+        point: 0,
+        bet: 0,
+        result: null,
+        win: false,
+      };
+      var players = [
+        {
+          id: generateId(),
+          ...defaultPlayer,
+        },
+        {
+          id: generateId(),
+          ...defaultPlayer,
+        },
+        {
+          id: generateId(),
+          ...defaultPlayer,
+        },
+      ];
+      var result = null;
+      var rolling = false;
+      var dices = {
+        result1: null,
+        result2: null,
+        result3: null,
+      };
+      function reset() {
+        if (rolling) return;
+        players = [
+          {
+            id: generateId(),
+            ...defaultPlayer,
+          },
+          {
+            id: generateId(),
+            ...defaultPlayer,
+          },
+          {
+            id: generateId(),
+            ...defaultPlayer,
+          },
+        ];
+        result = null;
+        rolling = false;
+        generatePlayerTable();
+        document.getElementById(
+          "play-area"
+        ).innerHTML = ` <div id="play-area-dice-result1">
+            <div class="dice dice-empty">?</div>
+          </div>
+          <div class="play-area-plus">+</div>
+          <div id="play-area-dice-result2">
+            <div class="dice dice-empty">?</div>
+          </div>
+          <div class="play-area-plus">+</div>
+          <div id="play-area-dice-result3">
+            <div class="dice dice-empty">?</div>
+          </div>
+          <div class="play-area-equal">=</div>
+          <div class="play-area-box">
+            <div id="play-area-result">?</div>
+          </div>`;
+      }
+      function randomDice(max, min) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function generateRandomDice(id, randomNumber) {
+        let html = "";
+        Array.from({ length: randomNumber }, (v, i) => i).forEach(() => {
+          html += "<div></div>";
+        });
+        document.getElementById(id).innerHTML =
+          '<div class="dice dice-' + randomNumber + '">' + html + "</div>";
+      }
+
+      function start() {
+        if (rolling) return;
+        rolling = true;
+        document.getElementById("play-area-result").innerHTML = "?";
+        dices.result1 = randomDice(0, 7);
+        dices.result2 = randomDice(0, 7);
+        dices.result3 = randomDice(0, 7);
+
+        let interval = setInterval(() => {
+          dices.result1 += 1;
+          if (dices.result1 > 6) {
+            dices.result1 = 1;
+          }
+          dices.result2 += 1;
+          if (dices.result2 > 6) {
+            dices.result2 = 1;
+          }
+          dices.result3 += 1;
+          if (dices.result3 > 6) {
+            dices.result3 = 1;
+          }
+
+          generateRandomDice("play-area-dice-result1", dices.result1);
+          generateRandomDice("play-area-dice-result2", dices.result2);
+          generateRandomDice("play-area-dice-result3", dices.result3);
+        }, 500);
+
+        setTimeout(() => {
+          clearInterval(interval);
+          interval = null;
+          dices.result1 = randomDice(0, 7);
+          dices.result2 = randomDice(0, 7);
+          dices.result3 = randomDice(0, 7);
+
+          generateRandomDice("play-area-dice-result1", dices.result1);
+          generateRandomDice("play-area-dice-result2", dices.result2);
+          generateRandomDice("play-area-dice-result3", dices.result3);
+
+          let calculate = dices.result1 + dices.result2 + dices.result3;
+          result =
+            calculate >= 12
+              ? possibleResults.find((c) => c.id == 0).value
+              : calculate == 11
+              ? possibleResults.find((c) => c.id == 1).value
+              : possibleResults.find((c) => c.id == 2).value;
+          const resultCls = result;
+          document.getElementById("play-area-result").innerHTML =
+            '<div class="play-area-sub-box ' +
+            resultCls.toLowerCase() +
+            '">' +
+            result +
+            "</div>";
+
+          players.forEach((player) => {
+            if (player.result == result && player.bet > 0) {
+              player.point += Number(player.bet) * (result == "Mid" ? 5 : 1);
+              player.win = true;
+            } else {
+              player.win = false;
+            }
+          });
+          generatePlayerTable();
+          rolling = false;
+        }, 5000);
+      }
+
+      function addPlayer() {
+        if (rolling) return;
+        const newPlayer = {
+          id: generateId(),
+          ...defaultPlayer,
+        };
+        players = [...players, newPlayer];
+        generateRow(newPlayer);
+      }
+
+      function playerForm(player) {
+        var tag = document.createElement("div");
+        tag.appendChild(document.createElement("div"));
+        tag.append(document.createElement("div"));
+
+        return tag;
+      }
+
+      function updatePlayerForm(id, fieldName, value) {
+        players.find((c) => c.id == id)[fieldName] = value;
+      }
+
+      function generateInputColumn(playerId, columnName, type, value) {
+        let nameInput = document.createElement("input");
+        nameInput.setAttribute("type", type ?? "text");
+        nameInput.onchange = function (event) {
+          updatePlayerForm(playerId, columnName, event.target.value);
+        };
+        nameInput.value = value ?? (type == "text" ? "" : 0);
+        return nameInput;
+      }
+
+      function generateOption(value, text) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.innerText = text;
+        return option;
+      }
+
+      function generateGroupButton(playerId, columnName, value) {
+        const hSubButton = document.createElement("div");
+        hSubButton.setAttribute(
+          "class",
+          "sub-button high" + (value == "High" ? " active" : "")
+        );
+        hSubButton.innerHTML = "High";
+        hSubButton.onclick = () => {
+          Array.from(
+            document.getElementById("group-btn-" + playerId).children
+          ).forEach((element) => {
+            if (element.classList.contains("high")) {
+              element.classList.add("active");
+            } else {
+              element.classList.remove("active");
+            }
+          });
+          updatePlayerForm(playerId, "result", "High");
+        };
+        const mSubButton = document.createElement("div");
+        mSubButton.setAttribute(
+          "class",
+          "sub-button mid" + (value == "Mid" ? " active" : "")
+        );
+        mSubButton.innerHTML = "Mid";
+        mSubButton.onclick = () => {
+          Array.from(
+            document.getElementById("group-btn-" + playerId).children
+          ).forEach((element) => {
+            if (element.classList.contains("mid")) {
+              element.classList.add("active");
+            } else {
+              element.classList.remove("active");
+            }
+          });
+          updatePlayerForm(playerId, "result", "Mid");
+        };
+
+        const lSubButton = document.createElement("div");
+        lSubButton.setAttribute(
+          "class",
+          "sub-button low" + (value == "Low" ? " active" : "")
+        );
+        lSubButton.innerHTML = "Low";
+        lSubButton.onclick = () => {
+          Array.from(
+            document.getElementById("group-btn-" + playerId).children
+          ).forEach((element) => {
+            if (element.classList.contains("low")) {
+              element.classList.add("active");
+            } else {
+              element.classList.remove("active");
+            }
+          });
+          updatePlayerForm(playerId, "result", "Low");
+        };
+
+        const groupButton = document.createElement("div");
+        groupButton.setAttribute("class", "group-button");
+        groupButton.setAttribute("id", "group-btn-" + playerId);
+        groupButton.appendChild(hSubButton);
+        groupButton.appendChild(mSubButton);
+        groupButton.appendChild(lSubButton);
+        return groupButton;
+      }
+
+      function generateSelect(playerId, columnName, value) {
+        const select = document.createElement("select");
+        select.appendChild(generateOption("", "choose"));
+        possibleResults.forEach((opt) => {
+          select.appendChild(generateOption(opt.value, opt.value));
+        });
+
+        select.onchange = function (event) {
+          updatePlayerForm(playerId, columnName, event.target.value);
+        };
+        select.value = value ?? "";
+        return select;
+      }
+
+      function generateDisplayColumn(value) {
+        let columnText = document.createElement("span");
+        columnText.innerText = value;
+        columnText.style = "font-size: 24px;";
+        return columnText;
+      }
+
+      function generateRow(player) {
+        const playerRow = document.createElement("div");
+        playerRow.setAttribute("data-id", player.id);
+        playerRow.setAttribute("class", (player.win ? "win" : "") + " row");
+        playerRow.appendChild(generateColumn(generateDisplayColumn(player.id)));
+        playerRow.appendChild(
+          generateColumn(
+            generateInputColumn(player.id, "name", "text", player.name)
+          )
+        );
+        playerRow.appendChild(
+          generateColumn(
+            generateInputColumn(player.id, "bet", "number", player.bet)
+          )
+        );
+        playerRow.appendChild(
+          generateColumn(
+            generateGroupButton(player.id, "result", player.result)
+          )
+        );
+        playerRow.appendChild(
+          generateColumn(generateDisplayColumn(player.point))
+        );
+        document.getElementById("player-table").append(playerRow);
+      }
+
+      function generateColumn(children) {
+        const playerColumn = document.createElement("div");
+        playerColumn.setAttribute("class", "column");
+        playerColumn.appendChild(children);
+        return playerColumn;
+      }
+
+      function generatePlayerTable() {
+        document.getElementById("player-table").innerHTML = "";
+        players.forEach((player) => {
+          generateRow(player);
+        });
+      }
+
+      generatePlayerTable();
+    </script>
+  </body>
+</html>
